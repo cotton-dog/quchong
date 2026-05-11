@@ -47,11 +47,11 @@
 
         textarea {
             width: 100%;
-            height: 200px;
-            padding: 15px;
+            height: 120px;
+            padding: 10px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 14px;
             resize: vertical;
             box-sizing: border-box;
             outline: none;
@@ -70,11 +70,11 @@
 
         button {
             flex: 1;
-            padding: 12px;
+            padding: 10px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 15px;
             transition: all 0.2s;
         }
 
@@ -97,10 +97,31 @@
             background-color: #e9ecef;
         }
 
+        .copy-btn {
+            background-color: #f0f2f5;
+            color: #2c3e50;
+            border: 1px solid var(--border-color);
+            font-size: 12px;
+            padding: 3px 10px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: normal;
+            flex: 0 0 auto;
+        }
+
+        .copy-btn:hover {
+            background-color: #e2e6ea;
+            border-color: #bdc3c7;
+        }
+
         .stats {
-            font-size: 14px;
+            font-size: 13px;
             color: #888;
             margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
     </style>
 </head>
@@ -111,7 +132,10 @@
     
     <div class="textarea-group">
         <div>
-            <div class="stats" id="inputStats">字数: 0</div>
+            <div class="stats" id="inputStats">
+                <span>原字数: 0</span>
+                <button class="copy-btn" id="copyInputBtn">复制原文</button>
+            </div>
             <textarea id="inputText" placeholder="请在这里输入或粘贴需要去重的文字..."></textarea>
         </div>
 
@@ -121,7 +145,10 @@
         </div>
 
         <div>
-            <div class="stats" id="outputStats">字数: 0</div>
+            <div class="stats" id="outputStats">
+                <span>去重后字数: 0</span>
+                <button class="copy-btn" id="copyOutputBtn">复制结果</button>
+            </div>
             <textarea id="outputText" placeholder="去重后的结果将显示在这里..." readonly></textarea>
         </div>
     </div>
@@ -130,15 +157,14 @@
 <script>
     function handleRemoveDuplicates() {
         const input = document.getElementById('inputText').value;
-        if (!input) return;
-
-        // 将字符串转为数组，利用 Set 对象自动去重的特性
-        // 这里会保留字符出现的先后顺序
+        if (!input) {
+            document.getElementById('outputText').value = '';
+            updateStats();
+            return;
+        }
         const uniqueChars = [...new Set(input.split(''))];
-        
         const result = uniqueChars.join('');
         document.getElementById('outputText').value = result;
-        
         updateStats();
     }
 
@@ -152,12 +178,57 @@
         const inputLen = document.getElementById('inputText').value.length;
         const outputLen = document.getElementById('outputText').value.length;
         
-        document.getElementById('inputStats').innerText = `原字数: ${inputLen}`;
-        document.getElementById('outputStats').innerText = `去重后字数: ${outputLen}`;
+        document.getElementById('inputStats').innerHTML = `<span>原字数: ${inputLen}</span><button class="copy-btn" id="copyInputBtn">复制原文</button>`;
+        document.getElementById('outputStats').innerHTML = `<span>去重后字数: ${outputLen}</span><button class="copy-btn" id="copyOutputBtn">复制结果</button>`;
+        
+        bindCopyEvents();
     }
 
-    // 实时监控输入框字数
+    async function copyToClipboard(text, successMsg) {
+        if (!text) {
+            alert('没有内容可复制！');
+            return;
+        }
+        try {
+            await navigator.clipboard.writeText(text);
+            alert(successMsg);
+        } catch (err) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            alert(successMsg);
+        }
+    }
+
+    function bindCopyEvents() {
+        const copyInputBtn = document.getElementById('copyInputBtn');
+        const copyOutputBtn = document.getElementById('copyOutputBtn');
+        
+        if (copyInputBtn) {
+            const newCopyInput = copyInputBtn.cloneNode(true);
+            copyInputBtn.parentNode.replaceChild(newCopyInput, copyInputBtn);
+            newCopyInput.addEventListener('click', function() {
+                const text = document.getElementById('inputText').value;
+                copyToClipboard(text, '原文已复制到剪贴板');
+            });
+        }
+        
+        if (copyOutputBtn) {
+            const newCopyOutput = copyOutputBtn.cloneNode(true);
+            copyOutputBtn.parentNode.replaceChild(newCopyOutput, copyOutputBtn);
+            newCopyOutput.addEventListener('click', function() {
+                const text = document.getElementById('outputText').value;
+                copyToClipboard(text, '去重结果已复制到剪贴板');
+            });
+        }
+    }
+
     document.getElementById('inputText').addEventListener('input', updateStats);
+    
+    updateStats();
 </script>
 
 </body>
