@@ -230,6 +230,29 @@
     
     updateStats();
 </script>
+<script>
+// 你的GitHub上的version.txt文件地址（等下创建）
+const VERSION_URL = 'https://raw.githubusercontent.com/你的用户名/你的项目名/main/version.txt';
+// 你的APK下载地址（等下创建Release后获得）
+const APK_URL = 'https://github.com/你的用户名/你的项目名/releases/download/v1.0/app.apk';
 
+// 当前版本号（每次更新记得改这个数字）
+const CURRENT_VERSION = 1;
+
+// 页面加载时检查更新
+window.addEventListener('DOMContentLoaded', function() {
+    fetch(VERSION_URL)
+        .then(res => res.text())
+        .then(serverVersion => {
+            if (parseInt(serverVersion) > CURRENT_VERSION) {
+                if (confirm('发现新版本！是否下载更新？')) {
+                    // 跳转到APK下载地址
+                    window.location.href = APK_URL;
+                }
+            }
+        })
+        .catch(err => console.log('检查更新失败', err));
+});
+</script>
 </body>
 </html>
