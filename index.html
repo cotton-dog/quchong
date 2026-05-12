@@ -2,11 +2,17 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#4a90e2">
-<link rel="apple-touch-icon" href="https://img.cdn1.vip/i/6a02e89336f81_1778575507.jpg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>文字去重工具</title>
+    
+    <!-- PWA 相关配置 -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4a90e2">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="文字去重">
+    <link rel="apple-touch-icon" href="https://img.cdn1.vip/i/6a02e89336f81_1778575507.jpg">
+    
     <style>
         :root {
             --bg-color: #f5f7fa;
@@ -285,7 +291,7 @@
         }
     }
 
-    // 恢复记忆与检查版本
+    // 恢复记忆
     window.onload = function() {
         ['--bg-opacity', '--card-opacity'].forEach(p => {
             const v = localStorage.getItem(p);
@@ -296,15 +302,64 @@
             }
         });
         
-        
-// 注册 Service Worker 以支持 PWA 安装
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log('PWA 注册成功'))
-            .catch(err => console.log('PWA 注册失败', err));
-    });
-}
+        // 注册 Service Worker 以支持 PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').then(reg => {
+                console.log('Service Worker 注册成功', reg);
+            }).catch(err => {
+                console.error('Service Worker 注册失败', err);
+            });
+        }
+    };
+</script>
+<script>
+    // 动态生成 manifest.json 内容并注入 (避免额外文件)
+    (function() {
+        const manifestObj = {
+            "name": "文字去重工具",
+            "short_name": "文字去重",
+            "start_url": ".",
+            "display": "standalone",
+            "theme_color": "#4a90e2",
+            "background_color": "#f5f7fa",
+            "icons": [
+                {
+                    "src": "https://img.cdn1.vip/i/6a02e89336f81_1778575507.jpg",
+                    "sizes": "192x192",
+                    "type": "image/jpeg"
+                },
+                {
+                    "src": "https://i.imgs.ovh/2026/05/12/487824c573ff3810d577edcf53424be2.jpg",
+                    "sizes": "512x512",
+                    "type": "image/jpeg"
+                }
+            ]
+        };
+        // 如果尚未存在 manifest link 则创建
+        if (!document.querySelector('link[rel="manifest"]')) {
+            const blob = new Blob([JSON.stringify(manifestObj)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        }
+    })();
+</script>
+<script>
+    // Service Worker 代码动态生成与注册 (内联实现，确保 sw.js 可用)
+    if ('serviceWorker' in navigator) {
+        const swCode = `self.addEventListener('install', event => { event.waitUntil(self.skipWaiting()); });
+self.addEventListener('activate', event => { event.waitUntil(self.clients.claim()); });
+self.addEventListener('fetch', event => { event.respondWith(fetch(event.request)); });`;
+        const blob = new Blob([swCode], {type: 'application/javascript'});
+        const swUrl = URL.createObjectURL(blob);
+        navigator.serviceWorker.register(swUrl).then(reg => {
+            console.log('动态 Service Worker 注册成功', reg);
+        }).catch(err => {
+            console.error('动态 Service Worker 注册失败', err);
+        });
+    }
 </script>
 </body>
 </html>
