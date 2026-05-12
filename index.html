@@ -20,7 +20,6 @@
             --primary-color: #4a90e2;
             --text-color: #333;
             --border-color: #e1e4e8;
-            /* 保留自定义变量，但默认不显示，不干扰原版视觉 */
             --bg-image: none;
             --bg-opacity: 1;
             --card-image: none;
@@ -42,7 +41,6 @@
             position: relative;
         }
 
-        /* 仅在有背景图时起作用的遮罩 */
         body::before {
             content: "";
             position: fixed;
@@ -66,7 +64,6 @@
             z-index: 1;
         }
 
-        /* 仅在有卡片图时起作用的遮罩 */
         .container::before {
             content: "";
             position: absolute;
@@ -151,27 +148,24 @@
             align-items: center;
         }
 
-      /* 设置图标：始终保持黑色 */
-.settings-wrapper { position: fixed; top: 20px; right: 20px; z-index: 100; }
-.settings-icon { 
-    width: 28px; 
-    height: 28px; 
-    cursor: pointer; 
-    fill: #333; /* 恢复为深色/黑色 */
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); /* 加上你原先有的投影 */
-}
-.settings-icon:hover { 
-    opacity: 0.8; /* 仅仅加一点点透明度反馈，颜色依然是黑的 */
-}
-.settings-panel {
-    display: none; position: absolute; top: 40px; right: 0;
-    width: 240px; background: white; padding: 20px; border-radius: 10px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: 1px solid #eee;
-    z-index: 101;
-}
-.settings-panel.active { display: block; }
-.setting-item { margin-bottom: 15px; }
-.setting-item label { display: block; margin-bottom: 8px; font-size: 13px; color: #444; }  
+        .settings-wrapper { position: fixed; top: 20px; right: 20px; z-index: 100; }
+        .settings-icon { 
+            width: 28px; 
+            height: 28px; 
+            cursor: pointer; 
+            fill: #333;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+        .settings-icon:hover { opacity: 0.8; }
+        .settings-panel {
+            display: none; position: absolute; top: 40px; right: 0;
+            width: 240px; background: white; padding: 20px; border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: 1px solid #eee;
+            z-index: 101;
+        }
+        .settings-panel.active { display: block; }
+        .setting-item { margin-bottom: 15px; }
+        .setting-item label { display: block; margin-bottom: 8px; font-size: 13px; color: #444; }  
     </style>
 </head>
 <body>
@@ -183,20 +177,20 @@
     <div class="settings-panel" id="settingsPanel">
         <div class="setting-item">
             <label>背景图</label>
-            <input type="file" accept="image/*" onchange="updateImage(this, '--bg-image')">
+            <input type="file" accept="image/*" id="bgImageInput" onchange="updateImage(this, '--bg-image', 'bgImageData')">
         </div>
         <div class="setting-item">
             <label>背景透明度</label>
-            <input type="range" min="0" max="1" step="0.1" value="1" oninput="updateStyle('--bg-opacity', this.value); localStorage.setItem('--bg-opacity', this.value)">
+            <input type="range" id="bgOpacitySlider" min="0" max="1" step="0.1" value="1" oninput="updateStyle('--bg-opacity', this.value); localStorage.setItem('--bg-opacity', this.value)">
         </div>
         <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
         <div class="setting-item">
             <label>卡片图</label>
-            <input type="file" accept="image/*" onchange="updateImage(this, '--card-image')">
+            <input type="file" accept="image/*" id="cardImageInput" onchange="updateImage(this, '--card-image', 'cardImageData')">
         </div>
         <div class="setting-item">
             <label>卡片透明度</label>
-            <input type="range" min="0" max="1" step="0.1" value="1" oninput="updateStyle('--card-opacity', this.value); localStorage.setItem('--card-opacity', this.value)">
+            <input type="range" id="cardOpacitySlider" min="0" max="1" step="0.1" value="1" oninput="updateStyle('--card-opacity', this.value); localStorage.setItem('--card-opacity', this.value)">
         </div>
     </div>
 </div>
@@ -253,7 +247,6 @@
         document.querySelector('#outputStats span').innerText = `去重后字数: ${oLen}`;
     }
 
-    // 静默复制功能
     async function copyText(id, btn) {
         const text = document.getElementById(id).value;
         if (!text) return;
@@ -272,31 +265,62 @@
         }
     }
 
-    // 设置与存储逻辑
     function toggleSettings() { 
         document.getElementById('settingsPanel').classList.toggle('active'); 
     }
-    function updateStyle(prop, val) { document.documentElement.style.setProperty(prop, val); }
+    
+    function updateStyle(prop, val) { 
+        document.documentElement.style.setProperty(prop, val); 
+    }
 
-    function updateImage(input, prop) {
+    // 保存图片到 localStorage（关键修复！）
+    function updateImage(input, styleProp, storageKey) {
         const file = input.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                updateStyle(prop, `url('${e.target.result}')`);
-                const opacityVar = prop === '--bg-image' ? '--bg-opacity' : '--card-opacity';
-                updateStyle(opacityVar, 0.3);
-                localStorage.setItem(opacityVar, 0.3);
-                const sliders = document.querySelectorAll('input[type="range"]');
-                (prop === '--bg-image' ? sliders[0] : sliders[1]).value = 0.3;
-            }
+                const imageData = e.target.result; // base64 数据
+                // 保存到 localStorage
+                localStorage.setItem(storageKey, imageData);
+                // 应用到页面
+                updateStyle(styleProp, `url('${imageData}')`);
+                
+                // 如果是背景图，自动设置透明度为 0.3
+                if (styleProp === '--bg-image') {
+                    updateStyle('--bg-opacity', 0.3);
+                    localStorage.setItem('--bg-opacity', 0.3);
+                    document.getElementById('bgOpacitySlider').value = 0.3;
+                } else if (styleProp === '--card-image') {
+                    updateStyle('--card-opacity', 0.3);
+                    localStorage.setItem('--card-opacity', 0.3);
+                    document.getElementById('cardOpacitySlider').value = 0.3;
+                }
+            };
             reader.readAsDataURL(file);
         }
     }
 
-    // 恢复记忆
+    // 恢复保存的图片
+    function restoreSavedImage(storageKey, styleProp, opacityProp, sliderId) {
+        const savedImage = localStorage.getItem(storageKey);
+        if (savedImage) {
+            updateStyle(styleProp, `url('${savedImage}')`);
+            // 恢复对应的透明度
+            const savedOpacity = localStorage.getItem(opacityProp);
+            if (savedOpacity) {
+                updateStyle(opacityProp, savedOpacity);
+                if (sliderId) document.getElementById(sliderId).value = savedOpacity;
+            } else if (styleProp === '--bg-image' || styleProp === '--card-image') {
+                // 如果有图片但没有透明度记录，默认设为 0.3
+                updateStyle(opacityProp, 0.3);
+                if (sliderId) document.getElementById(sliderId).value = 0.3;
+                localStorage.setItem(opacityProp, 0.3);
+            }
+        }
+    }
+
     window.onload = function() {
-        // 绑定设置图标点击事件（确保能正常工作）
+        // 绑定设置图标点击事件
         const settingsIcon = document.getElementById('settingsIcon');
         if (settingsIcon) {
             settingsIcon.onclick = function(e) {
@@ -305,27 +329,36 @@
             };
         }
         
-        ['--bg-opacity', '--card-opacity'].forEach(p => {
-            const v = localStorage.getItem(p);
-            if(v) {
-                updateStyle(p, v);
-                const ss = document.querySelectorAll('input[type="range"]');
-                (p === '--bg-opacity' ? ss[0] : ss[1]).value = v;
-            }
-        });
+        // 恢复透明度设置
+        const bgOpacity = localStorage.getItem('--bg-opacity');
+        if (bgOpacity) {
+            updateStyle('--bg-opacity', bgOpacity);
+            document.getElementById('bgOpacitySlider').value = bgOpacity;
+        }
         
-        // 注册 Service Worker 以支持 PWA
+        const cardOpacity = localStorage.getItem('--card-opacity');
+        if (cardOpacity) {
+            updateStyle('--card-opacity', cardOpacity);
+            document.getElementById('cardOpacitySlider').value = cardOpacity;
+        }
+        
+        // 恢复保存的图片（关键！）
+        restoreSavedImage('bgImageData', '--bg-image', '--bg-opacity', 'bgOpacitySlider');
+        restoreSavedImage('cardImageData', '--card-image', '--card-opacity', 'cardOpacitySlider');
+        
+        // PWA Service Worker 注册
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js').then(reg => {
-                console.log('Service Worker 注册成功', reg);
-            }).catch(err => {
-                console.error('Service Worker 注册失败', err);
-            });
+            const swCode = `self.addEventListener('install', event => { event.waitUntil(self.skipWaiting()); });
+self.addEventListener('activate', event => { event.waitUntil(self.clients.claim()); });
+self.addEventListener('fetch', event => { event.respondWith(fetch(event.request)); });`;
+            const blob = new Blob([swCode], {type: 'application/javascript'});
+            const swUrl = URL.createObjectURL(blob);
+            navigator.serviceWorker.register(swUrl).catch(err => console.error('SW注册失败', err));
         }
     };
 </script>
 <script>
-    // 动态生成 manifest.json 内容并注入 (避免额外文件)
+    // 动态生成 manifest.json
     (function() {
         const manifestObj = {
             "name": "文字去重工具",
@@ -347,7 +380,6 @@
                 }
             ]
         };
-        // 如果尚未存在 manifest link 则创建
         if (!document.querySelector('link[rel="manifest"]')) {
             const blob = new Blob([JSON.stringify(manifestObj)], {type: 'application/json'});
             const url = URL.createObjectURL(blob);
@@ -357,21 +389,6 @@
             document.head.appendChild(link);
         }
     })();
-</script>
-<script>
-    // Service Worker 代码动态生成与注册 (内联实现，确保 sw.js 可用)
-    if ('serviceWorker' in navigator) {
-        const swCode = `self.addEventListener('install', event => { event.waitUntil(self.skipWaiting()); });
-self.addEventListener('activate', event => { event.waitUntil(self.clients.claim()); });
-self.addEventListener('fetch', event => { event.respondWith(fetch(event.request)); });`;
-        const blob = new Blob([swCode], {type: 'application/javascript'});
-        const swUrl = URL.createObjectURL(blob);
-        navigator.serviceWorker.register(swUrl).then(reg => {
-            console.log('动态 Service Worker 注册成功', reg);
-        }).catch(err => {
-            console.error('动态 Service Worker 注册失败', err);
-        });
-    }
 </script>
 </body>
 </html>
