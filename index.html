@@ -296,15 +296,7 @@
             }
         });
         
-        // 版本检查
-        const CURRENT_VERSION = 1;
-        fetch('https://raw.githubusercontent.com/cotton-dog/quchong/main/version.txt')
-            .then(r => r.text())
-            .then(v => {
-                if(parseInt(v) > CURRENT_VERSION && confirm('发现新版本，是否更新？')) 
-                    window.location.href = 'https://github.com/cotton-dog/quchong/releases/download/v1.0/quchong.apk';
-            }).catch(e => {});
-    };
+        
 // 注册 Service Worker 以支持 PWA 安装
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
