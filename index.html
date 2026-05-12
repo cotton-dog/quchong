@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文字去重工具 - 修复版</title>
+    <title>文字去重工具</title>
     <style>
         :root {
             --bg-color: #f5f7fa;
@@ -11,28 +11,29 @@
             --primary-color: #4a90e2;
             --text-color: #333;
             --border-color: #e1e4e8;
+            /* 保留自定义变量，但默认不显示，不干扰原版视觉 */
             --bg-image: none;
-            --bg-opacity: 1; 
+            --bg-opacity: 1;
             --card-image: none;
-            --card-opacity: 1; 
+            --card-opacity: 1;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            padding: 30px;
-            box-sizing: border-box;
+            background-color: var(--bg-color);
             background-image: var(--bg-image);
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            margin: 0;
             position: relative;
-            z-index: 0;
         }
 
+        /* 仅在有背景图时起作用的遮罩 */
         body::before {
             content: "";
             position: fixed;
@@ -45,54 +46,122 @@
         .container {
             width: 100%;
             max-width: 800px;
-            padding: 30px 30px 20px 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            position: relative;
-            /* 关键修复：图片写在这里 */
+            background: var(--card-bg);
             background-image: var(--card-image);
             background-size: cover;
             background-position: center;
-            z-index: 1; /* 提升层级 */
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            position: relative;
+            z-index: 1;
         }
 
+        /* 仅在有卡片图时起作用的遮罩 */
         .container::before {
             content: "";
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
             background: var(--card-bg);
             opacity: var(--card-opacity);
-            z-index: -1; /* 遮罩在文字下面，但在背景图上面 */
+            z-index: -1;
             border-radius: 12px;
         }
 
-        h2 { margin-top: 0; color: #2c3e50; text-align: center; font-weight: 500; }
-        .textarea-group { display: flex; flex-direction: column; gap: 15px; }
-        textarea {
-            width: 100%; height: 120px; padding: 12px; border: 1px solid var(--border-color);
-            border-radius: 8px; font-size: 14px; resize: vertical; box-sizing: border-box;
-            outline: none; background: rgba(255, 255, 255, 0.7); transition: border-color 0.3s;
+        h2 {
+            margin-top: 0;
+            font-weight: 500;
+            color: #2c3e50;
+            text-align: center;
         }
-        textarea:focus { border-color: var(--primary-color); }
-        .controls { display: flex; gap: 10px; margin: 20px 0; }
-        button { flex: 1; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-size: 15px; transition: all 0.2s; }
+
+        .textarea-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            resize: vertical;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s;
+            background: rgba(255,255,255,0.8);
+        }
+
+        textarea:focus {
+            border-color: var(--primary-color);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+
         .btn-primary { background-color: var(--primary-color); color: white; }
         .btn-primary:hover { background-color: #357abd; }
         .btn-secondary { background-color: #f8f9fa; color: #666; border: 1px solid var(--border-color); }
-        .stats { font-size: 13px; color: #666; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; }
-        .copy-btn { background: #fff; border: 1px solid var(--border-color); padding: 4px 12px; border-radius: 14px; font-size: 12px; cursor: pointer; }
+        .btn-secondary:hover { background-color: #e9ecef; }
 
-        .settings-wrapper { position: fixed; top: 20px; right: 20px; z-index: 100; }
-        .settings-icon { width: 28px; height: 28px; cursor: pointer; fill: #000; } /* 确保图标是纯黑色 */
-        .settings-panel {
-            display: none; position: absolute; top: 40px; right: 0;
-            width: 240px; background: white; padding: 20px; border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: 1px solid #eee;
+        .copy-btn {
+            background-color: #f0f2f5;
+            color: #2c3e50;
+            border: 1px solid var(--border-color);
+            font-size: 12px;
+            padding: 3px 10px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: normal;
+            flex: 0 0 auto;
         }
-        .settings-panel.active { display: block; }
-        .setting-item { margin-bottom: 15px; }
-        .setting-item label { display: block; margin-bottom: 8px; font-size: 13px; color: #444; }
-        .setting-item input[type="range"] { width: 100%; cursor: pointer; }
+
+        .stats {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+      /* 设置图标：始终保持黑色 */
+.settings-wrapper { position: fixed; top: 20px; right: 20px; z-index: 100; }
+.settings-icon { 
+    width: 28px; 
+    height: 28px; 
+    cursor: pointer; 
+    fill: #333; /* 恢复为深色/黑色 */
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); /* 加上你原先有的投影 */
+}
+.settings-icon:hover { 
+    opacity: 0.8; /* 仅仅加一点点透明度反馈，颜色依然是黑的 */
+}
+.settings-panel {
+    display: none; position: absolute; top: 40px; right: 0;
+    width: 240px; background: white; padding: 20px; border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: 1px solid #eee;
+}
+.settings-panel.active { display: block; }
+.setting-item { margin-bottom: 15px; }
+.setting-item label { display: block; margin-bottom: 8px; font-size: 13px; color: #444; }  
     </style>
 </head>
 <body>
@@ -103,21 +172,21 @@
     </svg>
     <div class="settings-panel" id="settingsPanel">
         <div class="setting-item">
-            <label>背景图选择</label>
+            <label>背景图</label>
             <input type="file" accept="image/*" onchange="updateImage(this, '--bg-image')">
         </div>
         <div class="setting-item">
-            <label>背景纯色遮罩 (1.0纯色 - 0.0全图)</label>
-            <input type="range" min="0" max="1" step="0.1" value="1" oninput="updateStyle('--bg-opacity', this.value)">
+            <label>背景透明度</label>
+            <input type="range" min="0" max="1" step="0.1" value="1" oninput="updateStyle('--bg-opacity', this.value); localStorage.setItem('--bg-opacity', this.value)">
         </div>
-        <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
         <div class="setting-item">
-            <label>卡片图选择</label>
+            <label>卡片图</label>
             <input type="file" accept="image/*" onchange="updateImage(this, '--card-image')">
         </div>
         <div class="setting-item">
-            <label>卡片纯色遮罩 (1.0纯色 - 0.0全图)</label>
-            <input type="range" min="0" max="1" step="0.1" value="1" oninput="updateStyle('--card-opacity', this.value)">
+            <label>卡片透明度</label>
+            <input type="range" min="0" max="1" step="0.1" value="1" oninput="updateStyle('--card-opacity', this.value); localStorage.setItem('--card-opacity', this.value)">
         </div>
     </div>
 </div>
@@ -128,18 +197,20 @@
         <div>
             <div class="stats" id="inputStats">
                 <span>原字数: 0</span>
-                <button class="copy-btn" id="copyInputBtn">复制原文</button>
+                <button class="copy-btn" onclick="copyText('inputText', this)">复制原文</button>
             </div>
-            <textarea id="inputText" placeholder="请在这里输入或粘贴需要去重的文字..."></textarea>
+            <textarea id="inputText" placeholder="请在这里输入或粘贴需要去重的文字..." oninput="updateStats()"></textarea>
         </div>
+
         <div class="controls">
             <button class="btn-primary" onclick="handleRemoveDuplicates()">立即去重</button>
             <button class="btn-secondary" onclick="clearAll()">清空全部</button>
         </div>
+
         <div>
             <div class="stats" id="outputStats">
                 <span>去重后字数: 0</span>
-                <button class="copy-btn" id="copyOutputBtn">复制结果</button>
+                <button class="copy-btn" onclick="copyText('outputText', this)">复制结果</button>
             </div>
             <textarea id="outputText" placeholder="去重后的结果将显示在这里..." readonly></textarea>
         </div>
@@ -147,6 +218,7 @@
 </div>
 
 <script>
+    // 核心逻辑：去重
     function handleRemoveDuplicates() {
         const input = document.getElementById('inputText').value;
         if (!input) {
@@ -154,8 +226,7 @@
             updateStats();
             return;
         }
-        const result = [...new Set(input.split(''))].join('');
-        document.getElementById('outputText').value = result;
+        document.getElementById('outputText').value = [...new Set(input.split(''))].join('');
         updateStats();
     }
 
@@ -166,38 +237,35 @@
     }
 
     function updateStats() {
-        const inputLen = document.getElementById('inputText').value.length;
-        const outputLen = document.getElementById('outputText').value.length;
-        document.getElementById('inputStats').querySelector('span').innerText = `原字数: ${inputLen}`;
-        document.getElementById('outputStats').querySelector('span').innerText = `去重后字数: ${outputLen}`;
+        const iLen = document.getElementById('inputText').value.length;
+        const oLen = document.getElementById('outputText').value.length;
+        document.querySelector('#inputStats span').innerText = `原字数: ${iLen}`;
+        document.querySelector('#outputStats span').innerText = `去重后字数: ${oLen}`;
     }
 
-    async function copyToClipboard(elementId, btn) {
-        const text = document.getElementById(elementId).value;
+    // 静默复制功能
+    async function copyText(id, btn) {
+        const text = document.getElementById(id).value;
         if (!text) return;
+        const oldText = btn.innerText;
         try {
             await navigator.clipboard.writeText(text);
-            const originalText = btn.innerText;
             btn.innerText = '已复制！';
-            setTimeout(() => { btn.innerText = originalText; }, 1500);
-        } catch (err) {
-            console.error('复制失败');
+            setTimeout(() => btn.innerText = oldText, 1500);
+        } catch (e) {
+            const el = document.createElement('textarea');
+            el.value = text; document.body.appendChild(el);
+            el.select(); document.execCommand('copy');
+            document.body.removeChild(el);
+            btn.innerText = '已复制！';
+            setTimeout(() => btn.innerText = oldText, 1500);
         }
     }
 
-    document.getElementById('copyInputBtn').onclick = function() { copyToClipboard('inputText', this); };
-    document.getElementById('copyOutputBtn').onclick = function() { copyToClipboard('outputText', this); };
-    document.getElementById('inputText').oninput = updateStats;
+    // 设置与存储逻辑
+    function toggleSettings() { document.getElementById('settingsPanel').classList.toggle('active'); }
+    function updateStyle(prop, val) { document.documentElement.style.setProperty(prop, val); }
 
-    function toggleSettings() {
-        document.getElementById('settingsPanel').classList.toggle('active');
-    }
-
-    function updateStyle(prop, val) {
-        document.documentElement.style.setProperty(prop, val);
-    }
-
-    // 你要求的同步更新逻辑，全部保留在那，没动！
     function updateImage(input, prop) {
         const file = input.files[0];
         if (file) {
@@ -206,13 +274,34 @@
                 updateStyle(prop, `url('${e.target.result}')`);
                 const opacityVar = prop === '--bg-image' ? '--bg-opacity' : '--card-opacity';
                 updateStyle(opacityVar, 0.3);
+                localStorage.setItem(opacityVar, 0.3);
                 const sliders = document.querySelectorAll('input[type="range"]');
-                const targetSlider = prop === '--bg-image' ? sliders[0] : sliders[1];
-                targetSlider.value = 0.3;
+                (prop === '--bg-image' ? sliders[0] : sliders[1]).value = 0.3;
             }
             reader.readAsDataURL(file);
         }
     }
+
+    // 恢复记忆与检查版本
+    window.onload = function() {
+        ['--bg-opacity', '--card-opacity'].forEach(p => {
+            const v = localStorage.getItem(p);
+            if(v) {
+                updateStyle(p, v);
+                const ss = document.querySelectorAll('input[type="range"]');
+                (p === '--bg-opacity' ? ss[0] : ss[1]).value = v;
+            }
+        });
+        
+        // 版本检查
+        const CURRENT_VERSION = 1;
+        fetch('https://raw.githubusercontent.com/cotton-dog/quchong/main/version.txt')
+            .then(r => r.text())
+            .then(v => {
+                if(parseInt(v) > CURRENT_VERSION && confirm('发现新版本，是否更新？')) 
+                    window.location.href = 'https://github.com/cotton-dog/quchong/releases/download/v1.0/quchong.apk';
+            }).catch(e => {});
+    };
 </script>
 </body>
 </html>
