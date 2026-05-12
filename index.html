@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4a90e2">
+<link rel="apple-touch-icon" href="https://img.cdn1.vip/i/6a02e89336f81_1778575507.jpg">
     <title>文字去重工具</title>
     <style>
         :root {
@@ -302,6 +305,14 @@
                     window.location.href = 'https://github.com/cotton-dog/quchong/releases/download/v1.0/quchong.apk';
             }).catch(e => {});
     };
+// 注册 Service Worker 以支持 PWA 安装
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+            .then(reg => console.log('PWA 注册成功'))
+            .catch(err => console.log('PWA 注册失败', err));
+    });
+}
 </script>
 </body>
 </html>
