@@ -342,10 +342,12 @@
         }
         
         // 恢复保存的图片（关键！）
-        restoreSavedImage('bgImageData', '--bg-image', '--bg-opacity', 'bgOpacitySlider');
+       restoreSavedImage('bgImageData', '--bg-image', '--bg-opacity', 'bgOpacitySlider');
         restoreSavedImage('cardImageData', '--card-image', '--card-opacity', 'cardOpacitySlider');
-        
-        <script>
+    };    
+</script>
+
+<script>
     // PWA Service Worker 注册
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -356,4 +358,4 @@
     }
 </script>
 </body>
-</html>
+</html>      
