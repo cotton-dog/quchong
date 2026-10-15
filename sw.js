@@ -14,11 +14,11 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// 拦截请求，使其在无网络时也能打开
+// 拦截请求，优先请求网络，网络失败时回退到缓存（适用于开发或需要实时更新的场景）
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
+    fetch(event.request).catch(() => {
+      return caches.match(event.request);
     })
   );
 });
