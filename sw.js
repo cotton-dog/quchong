@@ -3,8 +3,8 @@ const ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './192.jpg',
-  './512.jpg'
+  './icon-192.jpg',
+  './icon-512.jpg'
 ];
 
 // 安装时缓存文件
