@@ -5,8 +5,8 @@ const ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './icon-192.jpg',
-  './icon-512.jpg'
+  './192.jpg',   // ✅ 改成实际的文件名
+  './512.jpg'    // ✅ 改成实际的文件名
 ];
 
 // 安装时，强制新 SW 立即跳过等待，并缓存新文件
