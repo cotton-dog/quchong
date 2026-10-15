@@ -6,8 +6,7 @@
     <title>文字去重工具</title>
     
     <!-- PWA 相关配置 -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#4a90e2">
+      <meta name="theme-color" content="#4a90e2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="文字去重">
@@ -348,14 +347,12 @@
         
         // PWA Service Worker 注册
         if ('serviceWorker' in navigator) {
-            const swCode = `self.addEventListener('install', event => { event.waitUntil(self.skipWaiting()); });
-self.addEventListener('activate', event => { event.waitUntil(self.clients.claim()); });
-self.addEventListener('fetch', event => { event.respondWith(fetch(event.request)); });`;
-            const blob = new Blob([swCode], {type: 'application/javascript'});
-            const swUrl = URL.createObjectURL(blob);
-            navigator.serviceWorker.register(swUrl).catch(err => console.error('SW注册失败', err));
-        }
-    };
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('SW ok', reg))
+      .catch(err => console.log('SW fail', err));
+  });
+} 
 </script>
 <script>
     // 动态生成 manifest.json
