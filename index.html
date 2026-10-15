@@ -345,47 +345,15 @@
         restoreSavedImage('bgImageData', '--bg-image', '--bg-opacity', 'bgOpacitySlider');
         restoreSavedImage('cardImageData', '--card-image', '--card-opacity', 'cardOpacitySlider');
         
-        // PWA Service Worker 注册
-        if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js')
-      .then(reg => console.log('SW ok', reg))
-      .catch(err => console.log('SW fail', err));
-  });
-} 
-</script>
-<script>
-    // 动态生成 manifest.json
-    (function() {
-        const manifestObj = {
-            "name": "文字去重工具",
-            "short_name": "文字去重",
-            "start_url": ".",
-            "display": "standalone",
-            "theme_color": "#4a90e2",
-            "background_color": "#f5f7fa",
-            "icons": [
-                {
-                    "src": "https://img.cdn1.vip/i/6a02e89336f81_1778575507.jpg",
-                    "sizes": "192x192",
-                    "type": "image/jpeg"
-                },
-                {
-                    "src": "https://i.imgs.ovh/2026/05/12/487824c573ff3810d577edcf53424be2.jpg",
-                    "sizes": "512x512",
-                    "type": "image/jpeg"
-                }
-            ]
-        };
-        if (!document.querySelector('link[rel="manifest"]')) {
-            const blob = new Blob([JSON.stringify(manifestObj)], {type: 'application/json'});
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('link');
-            link.rel = 'manifest';
-            link.href = url;
-            document.head.appendChild(link);
-        }
-    })();
+        <script>
+    // PWA Service Worker 注册
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('SW ok', reg))
+                .catch(err => console.log('SW fail', err));
+        });
+    }
 </script>
 </body>
 </html>
